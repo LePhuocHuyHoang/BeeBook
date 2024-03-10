@@ -5,11 +5,13 @@ import com.example.sample.common.util.AppUtils;
 import com.example.sample.dto.CommentDTO;
 import com.example.sample.dto.SearchDTO;
 import com.example.sample.entities.User;
+import com.example.sample.exception.AccessDeniedException;
 import com.example.sample.exception.ResponseEntityErrorException;
 import com.example.sample.payloads.ApiResponse;
 import com.example.sample.payloads.PagedResponse;
 import com.example.sample.payloads.UserRespone;
 import com.example.sample.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -73,5 +75,45 @@ public class UserController {
     public ResponseEntity<List<User>> getTop3BestUsers() {
         List<User> topUsers = userService.getTop3BestUsers();
         return new ResponseEntity<>(topUsers, HttpStatus.OK);
+    }
+    @GetMapping("/getRentedBook")
+    public ResponseEntity<?> getRentedBook(
+            @RequestParam Long userId,
+            @RequestParam(required = false) Long month,
+            @RequestParam(required = false) Long year,
+            @RequestParam(required = false) Long offset,
+            @RequestParam(required = false) Long fetch,
+            HttpServletRequest request
+    ) {
+        try {
+            boolean isParamValid = false;
+            if (request.getParameterValues("userId") != null && request.getParameterValues("userId").length > 1) {
+                isParamValid = true;
+            } else if (request.getParameterValues("month") != null && request.getParameterValues("month").length > 1) {
+                isParamValid = true;
+            }else if (request.getParameterValues("year") != null && request.getParameterValues("year").length > 1) {
+                isParamValid = true;
+            }
+            else if (request.getParameterValues("offset") != null && request.getParameterValues("offset").length > 1) {
+                isParamValid = true;
+            } else if (request.getParameterValues("fetch") != null && request.getParameterValues("fetch").length > 1) {
+                isParamValid = true;
+            }
+            if (isParamValid) {
+                throw new AccessDeniedException("Only one param value on each attribute should be provided");
+            }
+            if (offset == null) {
+                offset =Long.valueOf(0) ;
+            }
+            if (fetch == null) {
+                fetch = Long.valueOf(5);
+            }
+
+            return userService.getRentedBook(userId, month, year, offset, fetch);
+        } catch (AccessDeniedException e) {
+            return new ResponseEntity<>(
+                    new ApiResponse(Boolean.FALSE, e.getMessage()),
+                    HttpStatus.BAD_REQUEST);
+        }
     }
 }

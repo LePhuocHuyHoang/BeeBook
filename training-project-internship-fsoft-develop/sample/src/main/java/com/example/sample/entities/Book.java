@@ -1,5 +1,8 @@
 package com.example.sample.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -41,31 +44,33 @@ public class Book {
     @Column(name = "is_free", nullable = false)
     private Long isFree;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "author_book",
             joinColumns = @JoinColumn(name = "book_id"),
             inverseJoinColumns = @JoinColumn(name = "author_id")
     )
-    private Set<Author> authors = new HashSet<>();
+    @JsonIgnoreProperties("books")
+    private List<Author> authors = new ArrayList<>();
 
-
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "book_type",
             joinColumns = @JoinColumn(name = "book_id"),
             inverseJoinColumns = @JoinColumn(name = "type_id")
     )
-    private Set<Type> types = new HashSet<>();
+    @JsonIgnoreProperties("books")
+    private List<Type> types = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "comment", // Tên của bảng trung gian
-            joinColumns = @JoinColumn(name = "book_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private Set<User> users_comment;
-//
+//    @ManyToMany(fetch = FetchType.EAGER)
+//    @JoinTable(
+//            name = "comment",
+//            joinColumns = @JoinColumn(name = "book_id"),
+//            inverseJoinColumns = @JoinColumn(name = "user_id")
+//    )
+//    @JsonIgnoreProperties("books_comment")
+//    private List<User> users_comment = new ArrayList<>();
+
 //
 //    @ManyToMany(fetch = FetchType.LAZY)
 //    @JoinTable(
@@ -101,5 +106,20 @@ public class Book {
 //            inverseJoinColumns = @JoinColumn(name = "user_id")
 //    )
 //    private Set<User> users_rental;
-
+    @Override
+    public String toString() {
+        return "Book{" +
+            "id=" + id +
+            ", name='" + name + '\'' +
+            ", introduce=" + introduce +
+            ", ibsn=" + ibsn +
+            ", publicationYear=" + publicationYear +
+            ", publisher='" + publisher + '\'' +
+            ", totalPages=" + totalPages +
+            ", price=" + price +
+            ", fileSource=" + fileSource +
+            ", isFree=" + isFree +
+            ", authors=" + authors +
+            '}';
+}
 }

@@ -28,4 +28,9 @@ public interface BookService {
 
     List<Book> filterBook(String typeName, String authorName, BigDecimal minPrice, BigDecimal maxPrice);
 
+    ResponseEntity<ApiResponse> ratingBook(Long userId, Long bookId, Long rating);
+    ResponseEntity<ApiResponse> commentBook(Long userId, Long bookId, String comment);
+    ResponseEntity<ApiResponse> reportBook(Long userId, Long bookId, String reportContent);
+    ResponseEntity<?> getComment(Long bookId, Long offset, Long fetch);
+
 }

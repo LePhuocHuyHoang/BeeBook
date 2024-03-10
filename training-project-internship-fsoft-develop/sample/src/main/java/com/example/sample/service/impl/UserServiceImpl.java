@@ -1,7 +1,9 @@
 package com.example.sample.service.impl;
 
+import com.example.sample.common.constant.Constants;
 import com.example.sample.common.util.AppUtils;
 import com.example.sample.dto.CommentDTO;
+import com.example.sample.dto.RentalReceiptDTO;
 import com.example.sample.dto.SearchDTO;
 import com.example.sample.entities.User;
 import com.example.sample.exception.ResourceNotFoundException;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -30,6 +33,7 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
+    private static final String USER_STR = "User";
 
     @Autowired
     private ModelMapper modelMapper;
@@ -132,5 +136,24 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getTop3BestUsers() {
         return userRepository.getTop3BestUsers();
+    }
+    @Override
+    public ResponseEntity<?> getRentedBook(Long userId, Long month, Long year, Long offset, Long fetch) {
+        userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException(USER_STR, Constants.ID, userId));
+        if(offset < 0 || fetch < 0) {
+            return new ResponseEntity<ApiResponse>(new ApiResponse(Boolean.FALSE, "The value of the parameter cannot be negative"), HttpStatus.BAD_REQUEST);
+        }
+        List<Object[]> objects = userRepository.getRentedBook(userId, month, year, offset, fetch);
+        List<RentalReceiptDTO> receiptDTOs = new ArrayList<RentalReceiptDTO>();
+        for(Object[] obj: objects) {
+            Long bookId = (Long) obj[0];
+            String bookName = (String) obj[1];
+            Date date = (Date) obj[2];
+            SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+            String rentalDate = formatter.format(date);
+            Long pointPrice = (Long) obj[3];
+            receiptDTOs.add(new RentalReceiptDTO(bookId, bookName, rentalDate, pointPrice));
+        }
+        return new ResponseEntity<List<RentalReceiptDTO>>(receiptDTOs, HttpStatus.OK);
     }
 }

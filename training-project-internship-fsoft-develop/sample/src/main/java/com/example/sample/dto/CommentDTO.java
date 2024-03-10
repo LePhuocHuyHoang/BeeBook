@@ -16,4 +16,6 @@ public class CommentDTO {
     private String comment;
     private Date created_at;
 
+    public CommentDTO(Long userId, Long bookid, String comment, String createdAt) {
+    }
 }

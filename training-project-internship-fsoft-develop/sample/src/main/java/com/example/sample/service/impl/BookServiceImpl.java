@@ -1,6 +1,8 @@
 package com.example.sample.service.impl;
 
+import com.example.sample.common.constant.Constants;
 import com.example.sample.common.util.AppUtils;
+import com.example.sample.dto.CommentDTO;
 import com.example.sample.dto.SearchDTO;
 import com.example.sample.entities.Book;
 import com.example.sample.exception.AccessDeniedException;
@@ -21,15 +23,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 @Service
 public class BookServiceImpl implements BookService {
-
-    private static final String BOOK_STR = "Book";
     private BookRepository bookRepository;
+    private static final String BOOK_STR = "Book";
 
     private ModelMapper modelMapper;
 
@@ -41,19 +44,14 @@ public class BookServiceImpl implements BookService {
     @Override
     public PagedResponse<BookResponse> getAllBooks(int page, int size) {
         AppUtils.validatePageNumberAndSize(page, size);
-        // Sắp xếp theo id
         Sort sortInfo = Sort.by(Sort.Direction.DESC, "id");
         Pageable pageable = PageRequest.of(page, size, sortInfo);
-
         Page<Book> booksPage = bookRepository.findAll(pageable);
-
         System.out.println(booksPage.getContent());
-
         if (booksPage.getNumberOfElements() == 0) {
             return new PagedResponse<>(Collections.emptyList(), booksPage.getNumber(), booksPage.getSize(), booksPage.getTotalElements(),
                     booksPage.getTotalPages(), booksPage.isLast());
         }
-
         List<BookResponse> bookResponses = new ArrayList<>();
         BookResponse bookResponse = modelMapper.map(booksPage, BookResponse.class);
         bookResponse.setContent(booksPage.getContent());
@@ -153,5 +151,65 @@ public class BookServiceImpl implements BookService {
     @Override
     public List<Book> filterBook(String typeName, String authorName, BigDecimal minPrice, BigDecimal maxPrice) {
         return  bookRepository.filterBook(typeName, authorName, minPrice, maxPrice);
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse> ratingBook(Long userId, Long bookId, Long rating) {
+
+        List<Object[]> checkExistsUser = bookRepository.checkExistingUser(userId);
+        if(checkExistsUser.isEmpty()) {
+            return new ResponseEntity<ApiResponse>(new ApiResponse(Boolean.FALSE, "Invalid user id value"), HttpStatus.NOT_FOUND);
+        }
+        Book book = bookRepository.findById(bookId).orElseThrow(() ->  new ResourceNotFoundException(BOOK_STR, Constants.ID, bookId));
+        List<Integer> checkExistsRating = bookRepository.checkExistsRating(userId, bookId);
+        if(checkExistsRating.get(0) == 1) {
+            bookRepository.updateRating(userId, bookId, rating);
+            return new ResponseEntity<>(new ApiResponse(Boolean.TRUE, "Update success"), HttpStatus.OK);
+        }else {
+            bookRepository.insertRating(userId, bookId, rating);
+            return new ResponseEntity<>(new ApiResponse(Boolean.TRUE, "Insert success"), HttpStatus.OK);
+        }
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse> commentBook(Long userId, Long bookId, String comment) {
+        List<Object[]> checkExistsUser = bookRepository.checkExistingUser(userId);
+        if(checkExistsUser.isEmpty()) {
+            return new ResponseEntity<ApiResponse>(new ApiResponse(Boolean.FALSE, "Invalid user id value"), HttpStatus.NOT_FOUND);
+        }
+        Book book = bookRepository.findById(bookId).orElseThrow(() ->  new ResourceNotFoundException(BOOK_STR, Constants.ID, bookId));
+        bookRepository.insertComment(userId, bookId, comment);
+        return new ResponseEntity<>(new ApiResponse(Boolean.TRUE, "Comment success"), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse> reportBook(Long userId, Long bookId, String reportContent) {
+        List<Object[]> checkExistsUser = bookRepository.checkExistingUser(userId);
+        if(checkExistsUser.isEmpty()) {
+            return new ResponseEntity<ApiResponse>(new ApiResponse(Boolean.FALSE, "Invalid user id value"), HttpStatus.NOT_FOUND);
+        }
+        Book book = bookRepository.findById(bookId).orElseThrow(() ->  new ResourceNotFoundException(BOOK_STR, Constants.ID, bookId));
+        bookRepository.reportBook(userId, bookId, reportContent);
+        return new ResponseEntity<>(new ApiResponse(Boolean.TRUE, "Report success"), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<?> getComment(Long bookId, Long offset, Long fetch) {
+        bookRepository.findById(bookId).orElseThrow(()-> new ResourceNotFoundException(BOOK_STR, Constants.ID, bookId));
+        if(offset < 0 || fetch < 0) {
+            return new ResponseEntity<ApiResponse>(new ApiResponse(Boolean.FALSE, "The value of the parameter cannot be negative"), HttpStatus.BAD_REQUEST);
+        }
+        List<Object[]> objects = bookRepository.getComment(bookId, offset, fetch);
+        List<CommentDTO> commentDTOs = new ArrayList<CommentDTO>();
+        for(Object[] obj: objects) {
+            Long userId = (Long) obj[0];
+            Long bookid = (Long) obj[1];
+            String comment = (String) obj[2];
+            Date date = (Date) obj[3];
+            SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+            String createdAt = formatter.format(date);
+            commentDTOs.add(new CommentDTO(userId, bookid, comment, createdAt));
+        }
+        return new ResponseEntity<List<CommentDTO>>(commentDTOs, HttpStatus.OK);
     }
 }

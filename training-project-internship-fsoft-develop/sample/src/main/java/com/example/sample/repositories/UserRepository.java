@@ -34,4 +34,14 @@ public interface UserRepository extends JpaRepository<User,Long>{
     List<User> filterUser(@Param("gender") String gender, @Param("DOB") Long DOB, @Param("minPoint") BigDecimal minPoint, @Param("maxPoint") BigDecimal maxPoint);
     @Query(value = "EXEC getTop3BestUsers", nativeQuery = true)
     List<User> getTop3BestUsers();
+    @Modifying
+    @Transactional
+    @Query(value = "exec getRentedBook :userId, :month, :year, :offset, :fetch", nativeQuery = true)
+    List<Object[]> getRentedBook(
+            @Param("userId") Long userId,
+            @Param("month") Long month,
+            @Param("year") Long year,
+            @Param("offset") Long offset,
+            @Param("fetch") Long fetch
+    );
 }

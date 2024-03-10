@@ -5,9 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Data
 @NoArgsConstructor
@@ -17,5 +15,5 @@ public class AuthorDTO {
     private String name;
     private Date dob;
     private String bio;
-    private Set<Book> books = new HashSet<>();
+    private List<Book> books = new ArrayList<>();
 }

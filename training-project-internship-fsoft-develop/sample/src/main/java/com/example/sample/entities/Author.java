@@ -1,11 +1,11 @@
 package com.example.sample.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+
+import java.util.*;
 
 @Data
 @Entity
@@ -25,8 +25,17 @@ public class Author {
     @Column(name = "bio", length = 255, nullable = false)
     private String bio;
 
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "authors")
-    private Set<Book> books = new HashSet<>();
-
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "authors")
+    @JsonIgnoreProperties("authors")
+    private List<Book> books = new ArrayList<>();
+    @Override
+    public String toString() {
+        return "Author{" +
+            "id=" + id +
+            ", name='" + name + '\'' +
+            ", dob=" + dob +
+            ", bio='" + bio + '\'' +
+            '}';
+}
 }
 

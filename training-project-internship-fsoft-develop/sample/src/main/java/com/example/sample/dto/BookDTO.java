@@ -7,7 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -25,7 +27,7 @@ public class BookDTO {
     private Long price;
     private Long fileSource;
     private Long isFree;
-    private Set<Author> authors = new HashSet<>();
-    private Set<Type> types = new HashSet<>();
-    private Set<User> users_comment;
+    private List<Author> authors = new ArrayList<>();
+    private List<Type> types = new ArrayList<>();
+    private List<User> users_comment;
 }

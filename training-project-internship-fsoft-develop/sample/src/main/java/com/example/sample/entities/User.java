@@ -1,11 +1,9 @@
 package com.example.sample.entities;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Data
 @Entity
@@ -38,13 +36,13 @@ public class User {
     @Column(name = "gender", length = 255, nullable = false)
     private String gender;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "role_user",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles = new HashSet<>();
+//    @ManyToMany(fetch = FetchType.EAGER)
+//    @JoinTable(
+//            name = "role_user",
+//            joinColumns = @JoinColumn(name = "user_id"),
+//            inverseJoinColumns = @JoinColumn(name = "role_id")
+//    )
+//    private Set<Role> roles = new HashSet<>();
 //
 //    @ManyToMany(mappedBy = "users_rating", fetch = FetchType.LAZY)
 //    private Set<Book> books_rating;
@@ -52,8 +50,9 @@ public class User {
 //    @ManyToMany(mappedBy = "users_report", fetch = FetchType.LAZY)
 //    private Set<Book> books_report;
 //
-    @ManyToMany(mappedBy = "users_comment", fetch = FetchType.LAZY)
-    private Set<Book> books_comment;
+//    @ManyToMany(mappedBy = "users_comment", fetch = FetchType.EAGER)
+//    @JsonIgnoreProperties("users_comment")
+//    private List<Book> books_comment = new ArrayList<>();
 //
 //    @ManyToMany(mappedBy = "users_bookmark", fetch = FetchType.LAZY)
 //    private Set<Book> books_bookmark;

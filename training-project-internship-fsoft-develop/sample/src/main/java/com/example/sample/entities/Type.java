@@ -1,8 +1,10 @@
 package com.example.sample.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,9 +24,8 @@ public class Type {
     @Column(name = "description", length = 255, nullable = false)
     private String description;
 
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "types")
-    private Set<Book> books = new HashSet<>();
-
-    // Constructors, Getters, and Setters
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "types")
+    @JsonIgnoreProperties("types")
+    private List<Book> books = new ArrayList<>();
 
 }

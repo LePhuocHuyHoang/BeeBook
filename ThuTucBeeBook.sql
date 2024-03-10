@@ -1,76 +1,4 @@
-﻿--AUTHOR
---Get All Author
-ALTER PROC getAllAuthor
-AS
-BEGIN
-	SELECT * FROM author
-END
-EXEC getAllAuthor
-
---Get Author By Id
-ALTER PROC getAuthorById @authorid BIGINT
-AS
-BEGIN
-    IF EXISTS (SELECT 1 FROM author WHERE author_id = @authorid)
-    BEGIN
-        SELECT *
-        FROM author
-        WHERE author_id = @authorid;
-    END
-    ELSE
-    BEGIN
-        PRINT 'Xảy ra lỗi: Không có tác giả nào có id tương ứng.';
-    END
-END
-EXEC getAuthorById 18
-
---Insert Author
-ALTER PROC addNewAuthor
-    @authorName NVARCHAR(255),
-    @dob DATE,
-    @bio NVARCHAR(MAX)
-AS
-BEGIN
-    INSERT INTO author (author_name, dob, bio)
-    VALUES (@authorName, @dob, @bio);
-END
-EXEC addNewAuthor 
-    @authorName = N'John Green', 
-    @dob = '1977-08-24', 
-    @bio = N'John Green is an American author and YouTube content creator. He is well known for his young adult fiction, including the bestselling novels The Fault in Our Stars and Paper Towns.'
-
---Update Author
-ALTER PROC updateAuthor
-    @authorId BIGINT,
-    @authorName NVARCHAR(255),
-    @dob DATE,
-    @bio NVARCHAR(MAX)
-AS
-BEGIN
-    IF EXISTS (SELECT 1 FROM author WHERE author_id = @authorId)
-    BEGIN
-        UPDATE author
-        SET
-            author_name = @authorName,
-            dob = @dob,
-            bio = @bio
-        WHERE
-            author_id = @authorId;
-        PRINT 'Cập nhật thông tin tác giả thành công.';
-    END
-    ELSE
-    BEGIN
-        PRINT 'ID tác giả không tồn tại trong cơ sở dữ liệu. Không thể cập nhật.';
-    END
-END
-
-EXEC updateAuthor
-	@authorId = 22,
-    @authorName = N'John Greennnn', 
-    @dob = '1977-08-24', 
-    @bio = N'John Green is an American author and YouTube content creator. He is well known for his young adult fiction, including the bestselling novels The Fault in Our Stars and Paper Towns.'
-
---Delete Author
+﻿--Delete Author
 CREATE PROC deleteAuthor
     @authorId BIGINT
 AS
@@ -81,75 +9,6 @@ BEGIN
         DELETE FROM author WHERE author_id = @authorId;
 END
 EXEC deleteAuthor 15
-
-
---TYPE
---Get All Type
-ALTER PROC getAllType
-AS
-BEGIN
-	SELECT * FROM "type"
-END
-EXEC getAllType
-
---Get Type By Id
-ALTER PROC getTypeById @typeid BIGINT
-AS
-BEGIN
-    IF EXISTS (SELECT 1 FROM type WHERE "type_id" = @typeid)
-    BEGIN
-        SELECT *
-        FROM "type"
-        WHERE "type_id" = @typeid;
-    END
-    ELSE
-    BEGIN
-        PRINT 'Xảy ra lỗi: Không có thể loại sách nào có id tương ứng.';
-    END
-END
-EXEC getTypeById 5
-
---Insert Type
-ALTER PROC addNewType
-    @typeName NVARCHAR(255),
-    @description NVARCHAR(MAX)
-AS
-BEGIN
-    INSERT INTO "type"("type_name", "description")
-    VALUES (@typeName, @description);
-END
-EXEC addNewType 
-    @typeName = N'Funny', 
-    @description = 'Books that involve solving a crime or puzzle'
-
---Update Type
-ALTER PROC updateType
-    @typeId BIGINT,
-    @typeName NVARCHAR(255),
-    @description NVARCHAR(MAX)
-AS
-BEGIN
-    IF EXISTS (SELECT 1 FROM "type" WHERE "type_id" = @typeId)
-    BEGIN
-        UPDATE "type"
-        SET
-            "type_name" = @typeName,
-            "description" = @description
-        WHERE
-            "type_id" = @typeId;
-        PRINT 'Cập nhật thông tin thể loại sách thành công.';
-    END
-    ELSE
-    BEGIN
-        PRINT 'ID thể loại sách không tồn tại trong cơ sở dữ liệu. Không thể cập nhật.';
-    END
-END
-
-EXEC updateType
-	@typeId = 6,
-    @typeName = N'Funny', 
-    @description = 'Genre containing works characterized by humor, entertainment, and laughter for readers'
-
 --Delete Type
 CREATE PROC deleteType
     @typeId BIGINT
@@ -162,108 +21,6 @@ BEGIN
 END
 EXEC deleteType 2
 
-
---BOOK
---Get All Book
-ALTER PROC getAllBook
-AS
-BEGIN
-	SELECT * FROM book
-END
-EXEC getAllBook
-
---Get Book By Id
-ALTER PROC getBookById @bookid BIGINT
-AS
-BEGIN
-    IF EXISTS (SELECT 1 FROM book WHERE book_id = @bookid)
-    BEGIN
-        SELECT *
-        FROM book
-        WHERE book_id = @bookid;
-    END
-    ELSE
-    BEGIN
-        PRINT 'Xảy ra lỗi: Không có sách nào có tương ứng.';
-    END
-END
-EXEC getBookById 100
-
---Insert Book
-ALTER PROC addNewBook
-    @bookName NVARCHAR(255),
-    @introduce bigint,
-	@IBSN bigint,
-	@publicationYear bigint,
-	@publisher NVARCHAR(255),
-	@totalPages bigint,
-	@price bigint,
-	@fileSource bigint,
-	@isFree bigint
-AS
-BEGIN
-    INSERT INTO book (book_name, introduce, IBSN, publication_year, publisher, total_pages, price, file_source, is_free)
-    VALUES (@bookName, @introduce, @IBSN, @publicationYear, @publisher, @totalPages, @price, @fileSource, @isFree);
-END
-EXEC addNewBook 
-    @bookName = 'The Hitchhiker Guide to the Galaxy', 
-    @introduce = 21,
-	@IBSN = 9780345391803,
-	@publicationYear = 1992,
-	@publisher = 'Del Rey Books',
-	@totalPages =  224,
-	@price = 10.99,
-	@fileSource = 21,
-	@isFree = 0
-
---Update Book
-CREATE PROC updateBook
-	@bookId bigint,
-    @bookName NVARCHAR(255),
-    @introduce bigint,
-	@IBSN bigint,
-	@publicationYear bigint,
-	@publisher NVARCHAR(255),
-	@totalPages bigint,
-	@price bigint,
-	@fileSource bigint,
-	@isFree bigint
-AS
-BEGIN
-    IF EXISTS (SELECT 1 FROM book WHERE book_id = @bookId)
-    BEGIN
-        UPDATE book
-        SET
-            book_name = @bookName,
-			introduce = @introduce,
-			IBSN = @IBSN,
-			publication_year = @publicationYear,
-			publisher = @publisher,
-			total_pages = @totalPages,
-			price = @price,
-			file_source = @fileSource,
-			is_free = @isFree
-        WHERE
-            book_id = @bookId;
-        PRINT 'Cập nhật thông tin sách thành công.';
-    END
-    ELSE
-    BEGIN
-        PRINT 'ID sách không tồn tại trong cơ sở dữ liệu. Không thể cập nhật.';
-    END
-END
-
-EXEC updateBook
-	@bookId = 21,
-    @bookName = 'The Hitchhiker Guide to the Galaxy and The Moon', 
-    @introduce = 21,
-	@IBSN = 9780345391803,
-	@publicationYear = 1992,
-	@publisher = 'Del Rey Books',
-	@totalPages =  224,
-	@price = 10.99,
-	@fileSource = 21,
-	@isFree = 0
 
 --Delete Book
 ALTER PROC deleteBook
@@ -288,81 +45,6 @@ BEGIN
         DELETE FROM book WHERE book_id = @bookId;
 END
 EXEC deleteBook 100
-
-
---COMMENT
---Get Comment By Id
-ALTER PROC getCommentById
-    @userId INT,
-    @bookId INT
-AS
-BEGIN
-	IF EXISTS (SELECT 1 FROM book WHERE book_id = @bookid)
-    BEGIN
-        SELECT *
-        FROM comment
-        WHERE "user_id" = @userId AND book_id = @bookId;
-    END
-	ELSE
-    BEGIN
-        PRINT 'Xảy ra lỗi khi lấy comment.';
-    END
-END
-
-EXEC getCommentById
-	 @userId = 9, 
-	 @bookId = 90;
-
-
---Insert new comment
-CREATE PROC addNewComment
-    @userId BIGINT,
-    @bookId BIGINT,
-    @comment NVARCHAR(255),
-    @createdAt DATETIME
-AS
-BEGIN
-    BEGIN TRY
-        INSERT INTO comment ("user_id", book_id, comment, created_at)
-        VALUES (@userId, @bookId, @comment, @createdAt);
-
-        PRINT 'Thêm bình luận thành công.';
-    END TRY
-    BEGIN CATCH
-        PRINT 'Xảy ra lỗi khi thêm bình luận.';
-    END CATCH
-END 
-EXEC addNewComment 
-    @userId = 21, 
-    @bookId = 21, 
-    @comment = N'This book is amazing!', 
-    @createdAt = '2023-12-25 08:00:00';
-
---Update Comment
-ALTER PROC updateComment
-    @userId BIGINT,
-	@bookId BIGINT,
-    @comment NVARCHAR(255),
-    @createdAt DATETIME
-AS
-BEGIN
-    BEGIN TRY
-        UPDATE comment
-        SET comment = @comment,
-            created_at = @createdAt
-        WHERE "user_id" = @userId AND book_id = @bookId;
-
-        PRINT 'Cập nhật comment thành công.';
-    END TRY
-    BEGIN CATCH
-        PRINT 'Xảy ra lỗi khi cập nhật comment.';
-    END CATCH
-END
-EXEC updateComment 
-    @userId = 21,
-	@bookId = 21,
-    @comment = N'This book is amazinggggggggggggggg!', 
-    @createdAt = '2023-12-25 08:00:00';
 
 --Delete Comment
 ALTER PROC deleteComment
@@ -392,97 +74,6 @@ EXEC CheckCommentExists @commentId = 123;
 
 
 EXEC CheckCommentExists 200
---USER
---Get All User
-CREATE PROC getAllUser
-AS
-BEGIN
-	SELECT * FROM "user"
-END
-EXEC getAllUser
-
---Get User By Id
-CREATE PROC getUserById @userid BIGINT
-AS
-BEGIN
-    IF EXISTS (SELECT 1 FROM "user" WHERE "user_id" = @userid)
-    BEGIN
-        SELECT *
-        FROM "user"
-        WHERE "user_id" = @userid;
-    END
-    ELSE
-    BEGIN
-        PRINT 'Xảy ra lỗi: Không có người dùng nào tương ứng.';
-    END
-END
-EXEC getUserById 10
-
---Insert User
-CREATE PROC addNewUser
-    @firtsName NVARCHAR(255),
-    @lastName NVARCHAR(255),
-	@DOB date,
-	@userName NVARCHAR(255),
-	@password NVARCHAR(255),
-	@point bigint,
-	@gender NVARCHAR(255)
-AS
-BEGIN
-    INSERT INTO "user"(first_name, last_name, DOB, username, "password", point, gender)
-    VALUES (@firtsName, @lastName, @DOB, @userName, @password, @point, @gender);
-END
-EXEC addNewUser 
-    @firtsName = 'John',
-	@lastName = 'Doe',
-	@DOB =  '1990-05-15',
-	@userName = 'johndoe',
-	@password = 'password123',
-	@point = 100,
-	@gender =  'Male'
-
---Update User
-CREATE PROC updateUser
-    @userId BIGINT,
-    @firtsName NVARCHAR(255),
-    @lastName NVARCHAR(255),
-	@DOB date,
-	@userName NVARCHAR(255),
-	@password NVARCHAR(255),
-	@point bigint,
-	@gender NVARCHAR(255)
-AS
-BEGIN
-    IF EXISTS (SELECT 1 FROM "user" WHERE "user_id" = @userId)
-    BEGIN
-        UPDATE "user"
-        SET
-            first_name = @firtsName,
-            last_name = @lastName,
-			DOB = @DOB,
-			username = @userName,
-			"password" = @password,
-			point = @point,
-			gender = @gender
-        WHERE
-            "user_id" = @userId;
-        PRINT 'Cập nhật thông tin người dùng thành công.';
-    END
-    ELSE
-    BEGIN
-        PRINT 'ID người dùng không tồn tại trong cơ sở dữ liệu. Không thể cập nhật.';
-    END
-END
-
-EXEC updateUser
-	@userId = 21,
-    @firtsName = 'John',
-	@lastName = 'Doeeeeeee',
-	@DOB =  '1990-05-15',
-	@userName = 'johndoe',
-	@password = 'password123',
-	@point = 100,
-	@gender =  'Male'
 
 --Delete User
 CREATE PROC deleteUser
@@ -711,3 +302,117 @@ BEGIN
 END;
 
 EXEC getTop3BestUsers
+
+--Insert Rating
+CREATE PROC insertRating(@userId bigint,@bookId bigint, @rating bigint)
+AS	
+BEGIN
+	INSERT INTO rating values(@userId, @bookId, @rating, GETDATE())
+END
+
+--Update Rating
+CREATE PROC updateRating(@userId bigint,@bookId bigint, @rating bigint)
+AS
+BEGIN
+	update rating set rating = @rating, created_at = GETDATE() where user_id = @userId and book_id = @bookId
+END
+--Raiting Book
+CREATE PROC ratingBook(@userId bigint,@bookId bigint, @rating bigint)
+AS
+BEGIN
+	if exists (select * from rating where user_id = @userId and book_id = @bookId)
+		BEGIN
+			EXEC updateRating @userId, @bookId, @rating
+		END
+	ELSE
+		BEGIN
+			EXEC insertRating @userId, @bookId, @rating
+		END
+END
+
+--Insert Comment
+CREATE PROC insertComment(@userId bigint, @bookId bigint, @comment nvarchar(250))
+AS
+BEGIN
+	insert into comment values(@userId, @bookId, @comment, GETDATE())
+END
+
+--Get Comment
+CREATE PROC getComment(@bookId bigint, @offset bigint, @fetch bigint)
+AS
+BEGIN
+		select * from comment
+		where book_id = @bookId
+		order by created_at desc
+		OFFSET @offset ROWS FETCH NEXT @fetch ROWS ONLY
+END
+
+
+--Report Book
+CREATE PROC reportBook(@userId bigint, @bookId bigint, @reportContent nvarchar(250))
+AS
+BEGIN
+	insert into report values(@userId, @bookId, @reportContent, GETDATE())
+END
+
+--Point Transaction
+CREATE PROC getAllPointTransaction(@userId bigint, @offset bigint, @fetch bigint)
+AS
+BEGIN
+		select id_transaction, transaction_date, points_added,type_name from point_transaction p
+		join transaction_type t on p.transaction_type = t.type_id
+		where user_id = @userId
+		order by transaction_date desc
+		OFFSET @offset ROWS FETCH NEXT @fetch ROWS ONLY
+END
+
+--Statistical
+CREATE PROC getAllRentedBook(@userId bigint, @offset bigint, @fetch bigint)
+AS
+BEGIN
+	select book.book_id ,book_name, rental_date, point_price 
+		from book join rental_receipt on book.book_id = rental_receipt.book_id where user_id = @userId
+		order by rental_date desc
+		OFFSET @offset ROWS FETCH NEXT @fetch ROWS ONLY
+END
+
+--Statistical By Month
+CREATE PROC getRentedBookByMonth(@userId bigint, @month bigint, @year bigint, @offset bigint, @fetch bigint)
+AS
+BEGIN
+	select book.book_id, book_name, rental_date, point_price 
+		from book join rental_receipt on book.book_id = rental_receipt.book_id
+		where user_id = @userId and MONTH(rental_date) = @month and YEAR(rental_date) = @year
+		order by rental_date desc
+		OFFSET @offset ROWS FETCH NEXT @fetch ROWS ONLY
+END
+
+--Statistical By Year
+CREATE PROC getRentedBookByYear(@userId bigint, @year bigint, @offset bigint, @fetch bigint)
+AS
+BEGIN
+	select book.book_id,book_name, rental_date, point_price 
+		from book join rental_receipt on book.book_id = rental_receipt.book_id 
+		where user_id = @userId and YEAR(rental_date) = @year
+		order by rental_date desc
+		OFFSET @offset ROWS FETCH NEXT @fetch ROWS ONLY
+END
+
+
+--Get Rented Book
+CREATE PROC getRentedBook(@userId bigint, @month bigint = null, @year bigint = null, @offset bigint, @fetch bigint)
+AS
+BEGIN
+	IF @month IS NULL AND @year IS NULL
+	BEGIN
+		EXEC getAllRentedBook @userId, @offset, @fetch
+	END
+	ELSE IF @month IS NULL AND @year IS NOT NULL
+	BEGIN
+		EXEC getRentedBookByYear @userId, @year, @offset, @fetch
+	END
+	ELSE
+	BEGIN
+		EXEC getRentedBookByMonth @userId, @month, @year, @offset, @fetch
+	END
+END

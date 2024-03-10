@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.List;
 @Service
 public class AuthorServiceImpl implements AuthorService {
-    private static final String AUTHOR_STR = "Author";
     private AuthorRepository authorRepository;
 
     @Autowired
@@ -38,19 +37,19 @@ public class AuthorServiceImpl implements AuthorService {
     }
     @Override
     public PagedResponse<AuthorRespone> getAllAuthors(int page, int size) {
+        // Kiểm tra và xác thực số trang và kích thước trang.
         AppUtils.validatePageNumberAndSize(page, size);
         Sort sortInfo = Sort.by(Sort.Direction.DESC, "id");
+        //Tạo đối tượng pageable để phân trang.
         Pageable pageable = PageRequest.of(page, size, sortInfo);
-
         Page<Author> authorsPage = authorRepository.findAll(pageable);
-
         System.out.println(authorsPage.getContent());
-
+        //Kiểm tra không có phần tử thì trả về mảng rỗng.
         if (authorsPage.getNumberOfElements() == 0) {
             return new PagedResponse<>(Collections.emptyList(), authorsPage.getNumber(), authorsPage.getSize(), authorsPage.getTotalElements(),
                     authorsPage.getTotalPages(), authorsPage.isLast());
         }
-
+        //Chuyển đổi Author sang AuthorRespone bằng modelMapper.
         List<AuthorRespone> authorResponses = new ArrayList<>();
             AuthorRespone authorResponse = modelMapper.map(authorsPage, AuthorRespone.class);
             authorResponse.setContent(authorsPage.getContent());

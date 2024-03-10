@@ -22,4 +22,5 @@ public interface UserService {
     List<SearchDTO> searchUser(String keyword);
     List<User> filterUser(String gender, Long DOB, BigDecimal minPoint, BigDecimal maxPoint);
     List<User> getTop3BestUsers();
+    ResponseEntity<?> getRentedBook(Long userId, Long month, Long year, Long offset, Long fetch);
 }

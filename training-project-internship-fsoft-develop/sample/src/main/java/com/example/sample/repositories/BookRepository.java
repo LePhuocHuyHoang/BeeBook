@@ -27,4 +27,37 @@ public interface BookRepository extends JpaRepository<Book,Long>{
     List<Book> filterBook(@Param("typeName") String typeName, @Param("authorName") String authorName, @Param("minPrice") BigDecimal minPrice, @Param("maxPrice") BigDecimal maxPrice);
 
     boolean existsByName(String name);
+
+    @Modifying
+    @Query(value = "select * from dbo.[user] where user_id = :userId", nativeQuery = true)
+    List<Object[]> checkExistingUser(@Param("userId") Long userId);
+
+    @Modifying
+    @Query(value = "select COUNT(*) from rating where user_id =:userId and book_id =:bookId", nativeQuery = true)
+    List<Integer> checkExistsRating(@Param("userId") Long userId, @Param("bookId") Long bookId);
+
+    @Modifying
+    @Transactional
+    @Query(value= "exec insertRating :userId, :bookId, :rating", nativeQuery = true)
+    void insertRating(@Param("userId") Long userId, @Param("bookId") Long bookId, @Param("rating") Long rating);
+
+    @Modifying
+    @Transactional
+    @Query(value= "exec updateRating :userId, :bookId, :rating", nativeQuery = true)
+    void updateRating(@Param("userId") Long userId, @Param("bookId") Long bookId, @Param("rating") Long rating);
+
+    @Modifying
+    @Transactional
+    @Query(value= "exec insertComment :userId, :bookId, :comment", nativeQuery = true)
+    void insertComment(@Param("userId") Long userId, @Param("bookId") Long bookId, @Param("comment") String comment);
+
+    @Modifying
+    @Transactional
+    @Query(value= "exec getComment :bookId, :offset, :fetch", nativeQuery = true)
+    List<Object[]> getComment(@Param("bookId") Long bookId, @Param("offset") Long offset, @Param("fetch") Long fetch);
+
+    @Modifying
+    @Transactional
+    @Query(value= "exec reportBook :userId, :bookId, :reportContent", nativeQuery = true)
+    void reportBook(@Param("userId") Long userId, @Param("bookId") Long bookId, @Param("reportContent") String reportContent);
 }
