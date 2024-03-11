@@ -54,8 +54,14 @@ public class User {
 //    @JsonIgnoreProperties("users_comment")
 //    private List<Book> books_comment = new ArrayList<>();
 //
-//    @ManyToMany(mappedBy = "users_bookmark", fetch = FetchType.LAZY)
-//    private Set<Book> books_bookmark;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "bookmark",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "book_id")
+    )
+    @JsonIgnoreProperties("users")
+    List<Book> bookmark = new ArrayList<>();
 //
 //    @ManyToMany(mappedBy = "users_report", fetch = FetchType.LAZY)
 //    private Set<Book> books_rental;

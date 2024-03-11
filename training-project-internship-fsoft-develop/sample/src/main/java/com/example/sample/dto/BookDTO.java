@@ -24,7 +24,7 @@ public class BookDTO {
     private Long publicationYear;
     private String publisher;
     private Long totalPages;
-    private Long price;
+    private Long pointPrice;
     private Long fileSource;
     private Long isFree;
     private List<Author> authors = new ArrayList<>();

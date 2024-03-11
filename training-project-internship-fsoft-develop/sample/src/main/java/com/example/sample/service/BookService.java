@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 public interface BookService {
 
@@ -32,5 +33,8 @@ public interface BookService {
     ResponseEntity<ApiResponse> commentBook(Long userId, Long bookId, String comment);
     ResponseEntity<ApiResponse> reportBook(Long userId, Long bookId, String reportContent);
     ResponseEntity<?> getComment(Long bookId, Long offset, Long fetch);
+    List<Map<String, Object>> getFeaturedBooks(int top);
+
+    List<Map<String, Object>> getNewBooks();
 
 }

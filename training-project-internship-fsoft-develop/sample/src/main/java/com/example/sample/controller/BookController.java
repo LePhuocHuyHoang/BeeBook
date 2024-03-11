@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = { "/book" })
@@ -167,5 +168,15 @@ public class BookController {
                     HttpStatus.BAD_REQUEST);
         }
     }
+    @GetMapping("/featured")
+    public ResponseEntity<List<Map<String, Object>>> getFeaturedBooks(
+            @RequestParam(name = "top", required = false, defaultValue = "5") int top) {
+        List<Map<String, Object>> books = bookService.getFeaturedBooks(top);
+        return new ResponseEntity<>(books, HttpStatus.OK);
+    }
 
+    @GetMapping("/newbooks")
+    public List<Map<String, Object>> getNewBooks() {
+        return bookService.getNewBooks();
+    }
 }

@@ -116,4 +116,8 @@ public class UserController {
                     HttpStatus.BAD_REQUEST);
         }
     }
+    @GetMapping("/bookmark/{id}")
+    public ResponseEntity<?> getBookmarkByUserId(@PathVariable Long id) {
+        return userService.getUser(id);
+    }
 }

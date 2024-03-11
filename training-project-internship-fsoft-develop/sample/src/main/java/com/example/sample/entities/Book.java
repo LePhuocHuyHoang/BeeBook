@@ -21,13 +21,13 @@ public class Book {
     private String name;
 
     @Column(name = "introduce", nullable = false)
-    private Long introduce;
+    private String introduce;
 
     @Column(name = "IBSN", nullable = false)
     private Long ibsn;
 
     @Column(name = "publication_year", nullable = false)
-    private Long publicationYear;
+    private Date publicationYear;
 
     @Column(name = "publisher", length = 255, nullable = false)
     private String publisher;
@@ -35,11 +35,11 @@ public class Book {
     @Column(name = "total_pages", nullable = false)
     private Long totalPages;
 
-    @Column(name = "price", nullable = false)
-    private Long price;
+    @Column(name = "point_price", nullable = false)
+    private Long pointPrice;
 
     @Column(name = "file_source", nullable = false)
-    private Long fileSource;
+    private String fileSource;
 
     @Column(name = "is_free", nullable = false)
     private Long isFree;
@@ -116,7 +116,7 @@ public class Book {
             ", publicationYear=" + publicationYear +
             ", publisher='" + publisher + '\'' +
             ", totalPages=" + totalPages +
-            ", price=" + price +
+            ", pointPrice=" + pointPrice +
             ", fileSource=" + fileSource +
             ", isFree=" + isFree +
             ", authors=" + authors +

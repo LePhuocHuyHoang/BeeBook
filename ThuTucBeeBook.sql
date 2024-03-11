@@ -416,3 +416,85 @@ BEGIN
 		EXEC getRentedBookByMonth @userId, @month, @year, @offset, @fetch
 	END
 END
+
+--Sách mới: sách trong năm hiện tại 
+Create PROC GETNEWBOOKS
+AS
+BEGIN
+SELECT b.*,
+    (SELECT t.type_name AS name FROM book_type bt 
+	JOIN type t ON bt.type_id = t.type_id 
+	WHERE bt.book_id = b.book_id FOR JSON PATH) AS types,
+    (SELECT a.* FROM author a JOIN author_book ab 
+	ON a.author_id = ab.author_id 
+	WHERE ab.book_id = b.book_id FOR JSON PATH) AS authors
+FROM book b
+where year(publication_year) = year(getDate())
+end;
+
+--Gọi Proc
+EXEC GETNEWBOOKS
+
+--- Sách nổi bật: Sách top lượt mua và sách trong năm 2023 - 2024
+Create PROCEDURE GetFeaturedBooks
+    @NumberOfBooks INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT TOP (@NumberOfBooks)
+        b.book_id,
+        b.book_name,
+        b.introduce,
+        b.IBSN,
+        b.publication_year,
+        b.publisher,
+        b.total_pages,
+        b.point_price,
+        b.file_source,
+        b.is_free,
+        (
+            SELECT t.type_name AS name 
+            FROM book_type bt 
+            JOIN type t ON bt.type_id = t.type_id 
+            WHERE bt.book_id = b.book_id FOR JSON PATH
+        ) AS types,
+        JSON_QUERY((
+            SELECT 
+                a.author_id,
+                a.author_name,
+                a.DOB,
+                a.bio
+            FROM 
+                author a 
+            JOIN 
+                author_book ab ON a.author_id = ab.author_id
+            WHERE 
+                ab.book_id = b.book_id
+            FOR JSON PATH)
+        ) AS authors,
+        COUNT(rr.book_id) AS rental_count
+    FROM 
+        book b
+    LEFT JOIN 
+        rental_receipt rr ON b.book_id = rr.book_id
+    WHERE 
+        YEAR(b.publication_year) BETWEEN YEAR(GETDATE()) - 1 AND YEAR(GETDATE())
+    GROUP BY 
+        b.book_id,
+        b.book_name,
+        b.introduce,
+        b.IBSN,
+        b.publication_year,
+        b.publisher,
+        b.total_pages,
+        b.point_price,
+        b.file_source,
+        b.is_free
+    HAVING 
+        COUNT(rr.book_id) > 0
+    ORDER BY 
+        rental_count DESC;
+END;
+--Goi Proc:
+EXEC GetFeaturedBooks 1

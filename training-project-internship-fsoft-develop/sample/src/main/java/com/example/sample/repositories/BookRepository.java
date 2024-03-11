@@ -2,6 +2,8 @@ package com.example.sample.repositories;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+
 import com.example.sample.entities.Book;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -60,4 +62,9 @@ public interface BookRepository extends JpaRepository<Book,Long>{
     @Transactional
     @Query(value= "exec reportBook :userId, :bookId, :reportContent", nativeQuery = true)
     void reportBook(@Param("userId") Long userId, @Param("bookId") Long bookId, @Param("reportContent") String reportContent);
+
+    @Query(value="EXEC GetFeaturedBooks :top", nativeQuery = true)
+    List<Map<String, Object>> getFeaturedBooks(@Param("top") int top);
+    @Query(value="EXEC GETNEWBOOKS", nativeQuery = true)
+    List<Map<String, Object>> getNewBooks();
 }

@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,13 +18,13 @@ public class BookRequest{
 
     private Long id;
     private String name;
-    private Long introduce;
+    private String introduce;
     private Long ibsn;
-    private Long publicationYear;
+    private Date publicationYear;
     private String publisher;
     private Long totalPages;
-    private Long price;
-    private Long fileSource;
+    private Long pointPrice;
+    private String fileSource;
     private Long isFree;
     private Set<Author> authors = new HashSet<>();
     private Set<Type> types = new HashSet<>();

@@ -13,6 +13,12 @@ public class PointTransaction {
     @Column(name = "id_transaction")
     private Long idTransaction;
 
+    @Column(name = "transaction_date", nullable = false)
+    private Date transactionDate;
+
+    @Column(name = "points_added")
+    private Long pointsAdded;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -21,11 +27,7 @@ public class PointTransaction {
     @JoinColumn(name = "transaction_type")
     private TransactionType transactionType;
 
-    @Column(name = "transaction_date", nullable = false)
-    private Date transactionDate;
 
-    @Column(name = "points_added")
-    private Long pointsAdded;
 
     // Constructors, Getters, and Setters
 }

@@ -13,6 +13,8 @@ import com.example.sample.payloads.PagedResponse;
 import com.example.sample.payloads.request.BookRequest;
 import com.example.sample.repositories.BookRepository;
 import com.example.sample.service.BookService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,10 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class BookServiceImpl implements BookService {
@@ -114,7 +113,7 @@ public class BookServiceImpl implements BookService {
         book.setPublicationYear(newBook.getPublicationYear());
         book.setPublisher(newBook.getPublisher());
         book.setTotalPages(newBook.getTotalPages());
-        book.setPrice(newBook.getPrice());
+        book.setPointPrice(newBook.getPointPrice());
         book.setFileSource(newBook.getFileSource());
         book.setIsFree(newBook.getIsFree());
 
@@ -211,5 +210,51 @@ public class BookServiceImpl implements BookService {
             commentDTOs.add(new CommentDTO(userId, bookid, comment, createdAt));
         }
         return new ResponseEntity<List<CommentDTO>>(commentDTOs, HttpStatus.OK);
+    }
+    @Override
+    public List<Map<String, Object>> getFeaturedBooks(int top) {
+        List<Map<String, Object>> featuredBooks = bookRepository.getFeaturedBooks(top);
+        return modifyBooksInfo(featuredBooks);
+    }
+    @Override
+    public List<Map<String, Object>> getNewBooks() {
+        List<Map<String, Object>> newBooks = bookRepository.getNewBooks();
+        return modifyBooksInfo(newBooks);
+    }
+    private List<Map<String, Object>> modifyBooksInfo(List<Map<String, Object>> booksInfo) {
+        List<Map<String, Object>> modifiedBooksInfo = new ArrayList<>();
+
+        for (Map<String, Object> bookInfo : booksInfo) {
+            Map<String, Object> modifiedBookInfo = new HashMap<>(bookInfo); // Tạo một bản sao của bản đồ để thay đổi
+            String typesJson = (String) modifiedBookInfo.get("types");
+            List<Map<String, Object>> types = parseTypesJson(typesJson);
+            modifiedBookInfo.put("types", types);
+
+            String authorsJson = (String) modifiedBookInfo.get("authors");
+            List<Map<String, Object>> authors = parseAuthorsJson(authorsJson);
+            modifiedBookInfo.put("authors", authors);
+
+            modifiedBooksInfo.add(modifiedBookInfo);
+        }
+
+        return modifiedBooksInfo;
+    }
+    private List<Map<String, Object>> parseTypesJson(String typesJson) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.readValue(typesJson, new TypeReference<List<Map<String, Object>>>(){});
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+    private List<Map<String, Object>> parseAuthorsJson(String authorsJson) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.readValue(authorsJson, new TypeReference<List<Map<String, Object>>>(){});
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 }
