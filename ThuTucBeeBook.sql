@@ -23,7 +23,7 @@ EXEC deleteType 2
 
 
 --Delete Book
-ALTER PROC deleteBook
+CREATE PROC deleteBook
     @bookId BIGINT
 AS
 BEGIN
@@ -47,7 +47,7 @@ END
 EXEC deleteBook 100
 
 --Delete Comment
-ALTER PROC deleteComment
+CREATE PROC deleteComment
     @commentId BIGINT
 AS
 BEGIN
@@ -58,7 +58,7 @@ EXEC deleteComment
     @commentId = 20
 
 --Check Comment Exists
-ALTER PROC CheckCommentExists
+CREATE PROC CheckCommentExists
     @commentId BIGINT,
     @Exists BIT OUTPUT
 AS
@@ -112,7 +112,7 @@ BEGIN
 		b.publication_year,
 		b.publisher,
 		b.total_pages,
-		b.price,
+		b.point_price,
 		b.file_source,
 		b.is_free
     FROM
@@ -127,7 +127,7 @@ BEGIN
 		b.publication_year,
 		b.publisher,
 		b.total_pages,
-		b.price,
+		b.point_price,
 		b.file_source,
 		b.is_free
     ORDER BY
@@ -136,7 +136,7 @@ END;
 EXEC getTop3BestSellingBooks
 
 --Get All Comment
-ALTER PROC getAllComment(@offset BIGINT = null, @fetch BIGINT = null)
+CREATE PROC getAllComment(@offset BIGINT = null, @fetch BIGINT = null)
 AS
 BEGIN
 	IF @offset is null and @fetch is null
@@ -157,7 +157,7 @@ END
  EXEC getAllComment
 
  --Book Filter.
- ALTER PROC filterBook(@typeName NVARCHAR(255) = null, @authorName NVARCHAR(255) = null, @minPrice BIGINT = null, @maxPrice BIGINT = null)
+ CREATE PROC filterBook(@typeName NVARCHAR(255) = null, @authorName NVARCHAR(255) = null, @minPointPrice BIGINT = null, @maxPointPrice BIGINT = null)
  AS
 	BEGIN
 		SELECT b.*
@@ -168,11 +168,11 @@ END
 		JOIN author a ON a.author_id = ab.author_id
 		WHERE (@typeName IS NULL OR t."type_name" = @typeName)
 			AND (@authorName IS NULL OR a.author_name = @authorName)
-			AND (@minPrice IS NULL OR b.price >= @minPrice)
-			AND (@maxPrice IS NULL OR b.price <= @maxPrice)
+			AND (@minPointPrice IS NULL OR b.point_price >= @minPointPrice)
+			AND (@maxPointPrice IS NULL OR b.point_price <= @maxPointPrice)
 	END
 
-EXEC filterBook null, "J.D. Salinger", 15, 100
+EXEC filterBook 
 
 --Top 3 Author 
 CREATE PROC getTop3BestAuthors
@@ -203,7 +203,7 @@ END;
 EXEC getTop3BestAuthors
 
 --Author Filter.
-ALTER PROC filterAuthor(@birthYear INT = null, @typeName NVARCHAR(255) = null)
+CREATE PROC filterAuthor(@birthYear INT = null, @typeName NVARCHAR(255) = null)
 AS
 	BEGIN
 		SELECT DISTINCT a.*
@@ -244,7 +244,7 @@ END;
 EXEC getTop3BestTypes
 
  --User Filter.
-ALTER PROC filterUser(
+CREATE PROC filterUser(
     @gender NVARCHAR(255) = null,
     @DOB INT = null,
     @minPoint BIGINT = null,
@@ -370,7 +370,7 @@ END
 CREATE PROC getAllRentedBook(@userId bigint, @offset bigint, @fetch bigint)
 AS
 BEGIN
-	select book.book_id ,book_name, rental_date, point_price 
+	select book.book_id ,book_name, rental_date, rental_receipt.point_price 
 		from book join rental_receipt on book.book_id = rental_receipt.book_id where user_id = @userId
 		order by rental_date desc
 		OFFSET @offset ROWS FETCH NEXT @fetch ROWS ONLY
@@ -380,7 +380,7 @@ END
 CREATE PROC getRentedBookByMonth(@userId bigint, @month bigint, @year bigint, @offset bigint, @fetch bigint)
 AS
 BEGIN
-	select book.book_id, book_name, rental_date, point_price 
+	select book.book_id, book_name, rental_date, rental_receipt.point_price 
 		from book join rental_receipt on book.book_id = rental_receipt.book_id
 		where user_id = @userId and MONTH(rental_date) = @month and YEAR(rental_date) = @year
 		order by rental_date desc
@@ -391,7 +391,7 @@ END
 CREATE PROC getRentedBookByYear(@userId bigint, @year bigint, @offset bigint, @fetch bigint)
 AS
 BEGIN
-	select book.book_id,book_name, rental_date, point_price 
+	select book.book_id,book_name, rental_date, rental_receipt.point_price 
 		from book join rental_receipt on book.book_id = rental_receipt.book_id 
 		where user_id = @userId and YEAR(rental_date) = @year
 		order by rental_date desc
@@ -498,3 +498,55 @@ BEGIN
 END;
 --Goi Proc:
 EXEC GetFeaturedBooks 1
+
+
+--Trigger ADD and DEDUCT Amount when creat new Point Transaction
+
+CREATE TRIGGER trg_update_user_points
+ON point_transaction
+AFTER INSERT
+AS
+BEGIN
+    -- Kiểm tra xem có dữ liệu được chèn hay không
+    IF EXISTS (SELECT 1 FROM inserted)
+    BEGIN
+        -- Cập nhật số điểm cho người dùng
+        UPDATE u
+        SET u.point = 
+            CASE 
+                WHEN i.transaction_type = 1 THEN u.point + i.points_added
+                WHEN i.transaction_type = 2 THEN u.point - i.points_added
+                ELSE u.point -- Nếu transaction_type không phải 1 hoặc 2, không thay đổi số điểm
+            END
+        FROM [user] u
+        INNER JOIN inserted i ON u."user_id" = i."user_id";
+    END
+END;
+
+--Tính trung bình Raiting
+CREATE PROC averageRating
+    @bookId BIGINT
+AS
+BEGIN
+    -- Chọn AVG(rating) từ bảng rating r cho mỗi book_id
+    SELECT AVG(r.rating) AS averageRating
+    FROM rating r
+    JOIN book b ON r.book_id = b.book_id
+    WHERE b.book_id = @bookId;
+END;
+
+EXEC averageRating @bookId=1
+
+--Get User Rating
+ALTER PROC getUserRating
+    @userId BIGINT,
+	@bookId BIGINT
+AS
+BEGIN
+    SELECT rating
+    FROM rating r
+    WHERE user_id=@userId and book_id=@bookId
+END;
+
+EXEC getUserRating 21, 1
+
