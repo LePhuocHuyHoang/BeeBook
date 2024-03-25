@@ -1,6 +1,7 @@
 package com.beebook.beebookproject.controller;
 
 import com.beebook.beebookproject.common.util.Helpers;
+import com.beebook.beebookproject.entities.Book;
 import com.beebook.beebookproject.payloads.ApiResponse;
 import com.beebook.beebookproject.common.util.AppConstants;
 import com.beebook.beebookproject.common.util.AppUtils;
@@ -11,9 +12,13 @@ import com.beebook.beebookproject.exception.AccessDeniedException;
 import com.beebook.beebookproject.exception.ResponseEntityErrorException;
 import com.beebook.beebookproject.payloads.PagedResponse;
 import com.beebook.beebookproject.payloads.UserRespone;
+import com.beebook.beebookproject.repositories.BookRepository;
+import com.beebook.beebookproject.repositories.UserRepository;
 import com.beebook.beebookproject.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -23,12 +28,16 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping(value = { "/user" })
 public class UserController {
     private UserService userService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private BookRepository bookRepository;
 
     public UserController(UserService userService) {
         this.userService = userService;
@@ -45,10 +54,8 @@ public class UserController {
 
         return userService.getAllUsers(page, size);
     }
-    @DeleteMapping("/comment/{commentId}")
-    public ResponseEntity<ApiResponse> deleteComment(@PathVariable Long commentId) {
-
-
+    @DeleteMapping("/comment")
+    public ResponseEntity<ApiResponse> deleteComment(@RequestParam(name = "commentId") Long commentId) {
         return userService.deleteComment(commentId);
     }
     @DeleteMapping()
@@ -62,8 +69,8 @@ public class UserController {
 //        List<CommentDTO> comments = userService.getAllComment(offset, fetch);
 //        return new ResponseEntity<>(comments, HttpStatus.OK);
 //    }
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getUser(@PathVariable(name = "id") Long id) {
+    @GetMapping()
+    public ResponseEntity<?> getUser(@RequestParam(name = "userId") Long id) {
         return userService.getUser(id);
     }
     @GetMapping("/search")
@@ -127,8 +134,105 @@ public class UserController {
                     HttpStatus.BAD_REQUEST);
         }
     }
-    @GetMapping("/bookmark/{id}")
-    public ResponseEntity<?> getBookmarkByUserId(@PathVariable Long id) {
-        return userService.getUser(id);
+    @GetMapping("/bookmark")
+    public ResponseEntity<List<Map<String, Object>>> getBookmark() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Jwt jwtToken = ((JwtAuthenticationToken) authentication).getToken();
+        String jwt = jwtToken.getTokenValue();
+        String username = Helpers.getUserByJWT(jwt);
+        List<Map<String, Object>> bookmarkList = userService.getBookmark(username);
+        return new ResponseEntity<>(bookmarkList, HttpStatus.OK);
+    }
+
+    @PostMapping("/bookmark/{bookId}")
+    public ResponseEntity<Map<String, String>> addBookToBookmark(@PathVariable Long bookId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Kiểm tra xem người dùng đã đăng nhập chưa
+        if (!(authentication instanceof JwtAuthenticationToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("message", "Unauthorized"));
+        }
+
+        Jwt jwtToken = ((JwtAuthenticationToken) authentication).getToken();
+        String jwt = jwtToken.getTokenValue();
+        String username = Helpers.getUserByJWT(jwt);
+
+        User user = userRepository.findByUsername(username);
+
+        Map<String, String> response = new HashMap<>();
+
+        if (user != null) {
+            Optional<Book> bookOptional = bookRepository.findById(bookId);
+            if (bookOptional.isPresent()) {
+                Book book = bookOptional.get();
+
+                if (!user.getBookmark().contains(book)) {
+                    user.getBookmark().add(book);
+                    userRepository.save(user);
+                    response.put("message", "Book added to bookmark successfully.");
+                    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+                } else {
+                    response.put("message", "Book already exists in bookmark.");
+                    return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+                }
+            } else {
+                response.put("message", "Book not found.");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+        } else {
+            response.put("message", "User not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+    }
+
+    @DeleteMapping("/bookmark/{bookId}")
+    public ResponseEntity<Map<String, String>> removeBookmark(@PathVariable Long bookId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Kiểm tra xem người dùng đã đăng nhập chưa
+        if (!(authentication instanceof JwtAuthenticationToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("message", "Unauthorized"));
+        }
+
+        Jwt jwtToken = ((JwtAuthenticationToken) authentication).getToken();
+        String jwt = jwtToken.getTokenValue();
+        String username = Helpers.getUserByJWT(jwt);
+
+        User user = userRepository.findByUsername(username);
+
+        Map<String, String> response = new HashMap<>();
+
+        if (user != null) {
+            Optional<Book> bookOptional = bookRepository.findById(bookId);
+            if (bookOptional.isPresent()) {
+                Book book = bookOptional.get();
+
+                if (user.getBookmark().contains(book)) {
+                    user.getBookmark().remove(book);
+                    userRepository.save(user);
+                    response.put("message", "Book removed from bookmark successfully.");
+                    return ResponseEntity.ok(response);
+                } else {
+                    response.put("message", "Book does not exist in bookmark.");
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+                }
+            } else {
+                response.put("message", "Book not found.");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+        } else {
+            response.put("message", "User not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+    }
+    @GetMapping("/getProfile")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<?> getProfile(
+    ) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Jwt jwtToken = ((JwtAuthenticationToken) authentication).getToken();
+        String jwt = jwtToken.getTokenValue();
+        String username = Helpers.getUserByJWT(jwt);
+        return userService.getProfile(username);
     }
 }

@@ -64,13 +64,13 @@ public class BookController {
         return bookService.addBook(bookRequest);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateBook(@PathVariable(name = "id") Long id,
+    @PutMapping()
+    public ResponseEntity<?> updateBook(@RequestParam(name = "bookId") Long id,
                                                    @RequestBody BookRequest newBook) {
         return bookService.updateBook(id,newBook);
     }
-    @DeleteMapping("/{bookId}")
-    public ResponseEntity<ApiResponse> deleteBook(@PathVariable Long bookId) {
+    @DeleteMapping()
+    public ResponseEntity<ApiResponse> deleteBook(@RequestParam(name = "bookId") Long bookId) {
         return bookService.deleteBook(bookId);
     }
     @GetMapping("/search")

@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 
 @Repository
@@ -65,4 +66,13 @@ public interface UserRepository extends JpaRepository<User,Long>{
     @Transactional
     @Query(value = "EXEC getUserRating :userId, :bookId", nativeQuery = true)
     int getUserRating(@Param("userId")Long userId, @Param("bookId")Long bookId);
+
+    @Query(value = "exec getBookmark :userId", nativeQuery = true)
+    List<Map<String, Object>> getBookmark(@Param("userId") Long userId);
+
+    @Modifying
+    @Transactional
+    @Query(value = "select username, first_name, last_name, DOB, point, gender, email from [user] where username = :userName", nativeQuery = true)
+    List<Object[]> getProfile(@Param("userName") String userName);
+
 }

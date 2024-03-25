@@ -83,8 +83,6 @@ public class BookServiceImpl implements BookService {
             User user = userRepository.findByUsername(username);
             double avg = bookRepository.averageRating(bookId);
             int rating = userRepository.getUserRating(user.getId(), bookId);
-            System.out.println(rating);
-
             BookDTO bookDTO = new BookDTO(book, avg, rating);
             return ResponseEntity.ok(bookDTO);
         } else {
@@ -280,4 +278,5 @@ public class BookServiceImpl implements BookService {
             return new ArrayList<>();
         }
     }
+    
 }

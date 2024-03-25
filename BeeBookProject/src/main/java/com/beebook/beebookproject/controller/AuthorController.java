@@ -37,21 +37,21 @@ public class AuthorController {
 
         return authorService.getAllAuthors(page, size);
     }
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getAuthor(@PathVariable(name = "id") Long id) {
+    @GetMapping()
+    public ResponseEntity<?> getAuthor(@RequestParam(name = "authorId") Long id) {
         return authorService.getAuthor(id);
     }
     @PostMapping
     public ResponseEntity<?> addAuthor(@RequestBody AuthorRequest authorRequest) {
         return authorService.addAuthor(authorRequest);
     }
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateBook(@PathVariable(name = "id") Long id,
+    @PutMapping("")
+    public ResponseEntity<?> updateBook(@RequestParam(name = "authorId") Long id,
                                                   @RequestBody AuthorRequest newAuthor) {
         return authorService.updateAuthor(id,newAuthor);
     }
-    @DeleteMapping("/{authorId}")
-    public ResponseEntity<ApiResponse> deleteAuthor(@PathVariable Long authorId) {
+    @DeleteMapping()
+    public ResponseEntity<ApiResponse> deleteAuthor(@RequestParam(name = "authorId") Long authorId) {
         return authorService.deleteAuthor(authorId);
     }
     @GetMapping("/search")

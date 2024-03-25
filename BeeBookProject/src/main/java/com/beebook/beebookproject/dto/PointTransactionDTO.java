@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PointTransactionDTO {
-	private Long idTransaction;
+//	private Long idTransaction;
 	private String transactionDate;
 	private Long pointsAdded;
 	private String typeName;

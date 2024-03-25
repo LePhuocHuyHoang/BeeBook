@@ -46,13 +46,13 @@ public class PointTransactionServiceImpl implements PointTransactionService{
 		List<PointTransactionDTO> pointTransactionDTOs = new ArrayList<PointTransactionDTO>();
 		for(Object[] obj: objects) {
 
-			Long idTransaction = (Long) obj[0];
-			Date date = (Date) obj[1];
+//			Long idTransaction = (Long) obj[0];
+			Date date = (Date) obj[0];
 			SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
 			String transactionDate = formatter.format(date);
-			Long pointsAdded = (Long) obj[2];
-			String typeName = (String) obj[3];
-			pointTransactionDTOs.add(new PointTransactionDTO(idTransaction, transactionDate, pointsAdded, typeName));
+			Long pointsAdded = (Long) obj[1];
+			String typeName = (String) obj[2];
+			pointTransactionDTOs.add(new PointTransactionDTO(transactionDate, pointsAdded, typeName));
 		}
 		return new ResponseEntity<List<PointTransactionDTO>>(pointTransactionDTOs, HttpStatus.OK);
 	}

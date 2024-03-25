@@ -49,7 +49,8 @@ public class SecurityConfig {
             web.ignoring().requestMatchers(
                     HttpMethod.POST,
                     "/public/**",
-                    "/users"
+                    "/users",
+                    "/public/stripe/buy"
             );
             web.ignoring().requestMatchers(
                     HttpMethod.GET,

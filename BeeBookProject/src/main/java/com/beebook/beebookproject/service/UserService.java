@@ -1,7 +1,6 @@
 package com.beebook.beebookproject.service;
 
 
-import com.beebook.beebookproject.dto.CommentDTO;
 import com.beebook.beebookproject.dto.SearchDTO;
 import com.beebook.beebookproject.dto.UserRegistrationDto;
 import com.beebook.beebookproject.entities.User;
@@ -12,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 
 public interface UserService {
@@ -21,6 +21,8 @@ public interface UserService {
     ResponseEntity<ApiResponse> deleteUser(String username);
     ResponseEntity<ApiResponse> deleteUserByUserName(String userName);
     ResponseEntity<?> getUser(Long id);
+
+
     List<SearchDTO> searchUser(String keyword);
     List<User> filterUser(String gender, Long DOB, BigDecimal minPoint, BigDecimal maxPoint);
     List<User> getTop3BestUsers();
@@ -43,5 +45,6 @@ public interface UserService {
     // Save User
 //    User save(UserRegistrationDto registrationDto);
 
-
+    List<Map<String, Object>> getBookmark(String username);
+    ResponseEntity<?> getProfile(String userName);
 }

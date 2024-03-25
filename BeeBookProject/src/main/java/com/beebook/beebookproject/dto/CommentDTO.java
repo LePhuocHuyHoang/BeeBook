@@ -8,11 +8,11 @@ import java.util.Date;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
+//@AllArgsConstructor
 public class CommentDTO {
-    private Long comment_id;
-    private Long book_id;
-    private Long user_id;
+//    private Long comment_id;
+//    private Long book_id;
+//    private Long user_id;
     private String user_name;
     private String comment;
     private String created_at;

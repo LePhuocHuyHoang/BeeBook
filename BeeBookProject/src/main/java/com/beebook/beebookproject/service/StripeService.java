@@ -104,13 +104,13 @@ public class StripeService {
             throw new RuntimeException(e.getMessage());
         }
     }
-    public ResponseEntity<?> buy(Long bookId){
+    public ResponseEntity<?> buy(Long bookId, String username){
         Book book = bookRepository.findById(bookId).orElse(null);
         if (book == null) {
             return ResponseEntity.badRequest().body("Book not found");
         }
-
-        User user = userRepository.findById(21L).orElse(null);
+        User user = userRepository.findByUsername(username);
+        System.out.println(username);
         if (user == null) {
             return ResponseEntity.badRequest().body("User not found");
         }

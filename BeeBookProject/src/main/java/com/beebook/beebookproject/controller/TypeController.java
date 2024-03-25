@@ -36,21 +36,21 @@ public class TypeController {
 
         return typeService.getAllTypes(page, size);
     }
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getType(@PathVariable(name = "id") Long id) {
+    @GetMapping()
+    public ResponseEntity<?> getType(@RequestParam(name = "typeId") Long id) {
         return typeService.getType(id);
     }
     @PostMapping
     public ResponseEntity<?> addType(@RequestBody TypeRequest typeRequest) {
         return typeService.addType(typeRequest);
     }
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateType(@PathVariable(name = "id") Long id,
+    @PutMapping()
+    public ResponseEntity<?> updateType(@RequestParam(name = "typeId") Long id,
                                         @RequestBody TypeRequest newType) {
         return typeService.updateType(id,newType);
     }
-    @DeleteMapping("/{typeId}")
-    public ResponseEntity<ApiResponse> deleteType(@PathVariable Long typeId) {
+    @DeleteMapping()
+    public ResponseEntity<ApiResponse> deleteType(@RequestParam(name = "typeId") Long typeId) {
         return typeService.deleteType(typeId);
     }
     @GetMapping("/search")

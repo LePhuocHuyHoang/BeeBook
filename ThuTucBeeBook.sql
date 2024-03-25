@@ -331,21 +331,26 @@ BEGIN
 END
 
 --Insert Comment
-CREATE PROC insertComment(@userId bigint, @bookId bigint, @comment nvarchar(250))
+Alter PROC insertComment(@userName nvarchar(250), @bookId bigint, @comment nvarchar(250))
 AS
 BEGIN
+	DECLARE @userId BIGINT
+	SELECT @userId = user_id from [user] where username = @userName
 	insert into comment values(@userId, @bookId, @comment, GETDATE())
 END
 
 --Get Comment
-CREATE PROC getComment(@bookId bigint, @offset bigint, @fetch bigint)
+ALTER PROC getComment(@bookId bigint, @offset bigint, @fetch bigint)
 AS
 BEGIN
-		select * from comment
+		select username, comment, created_at from comment
+		join [user] on [user].user_id = comment.user_id
 		where book_id = @bookId
 		order by created_at desc
 		OFFSET @offset ROWS FETCH NEXT @fetch ROWS ONLY
 END
+
+exec getComment 1,0,5
 
 
 --Report Book
@@ -356,15 +361,17 @@ BEGIN
 END
 
 --Point Transaction
-CREATE PROC getAllPointTransaction(@userId bigint, @offset bigint, @fetch bigint)
+ALTER PROC getAllPointTransaction(@userId bigint, @offset bigint, @fetch bigint)
 AS
 BEGIN
-		select id_transaction, transaction_date, points_added,type_name from point_transaction p
+		select transaction_date, points_added,type_name from point_transaction p
 		join transaction_type t on p.transaction_type = t.type_id
 		where user_id = @userId
 		order by transaction_date desc
 		OFFSET @offset ROWS FETCH NEXT @fetch ROWS ONLY
 END
+
+exec getAllPointTransaction 22,0,5
 
 --Statistical
 CREATE PROC getAllRentedBook(@userId bigint, @offset bigint, @fetch bigint)
@@ -549,4 +556,26 @@ BEGIN
 END;
 
 EXEC getUserRating 21, 1
+
+--Get all bookmark by user
+Create PROCEDURE getBookmark 
+    @userId INT
+AS
+BEGIN
+    SELECT b.*,
+        (SELECT t.type_name AS name 
+            FROM book_type bt 
+            JOIN type t ON bt.type_id = t.type_id 
+            WHERE bt.book_id = b.book_id 
+            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER) AS types,
+        (SELECT a.author_id, a.author_name, a.DOB, a.bio 
+            FROM author a 
+            JOIN author_book ab ON a.author_id = ab.author_id 
+            WHERE ab.book_id = b.book_id 
+            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER) AS authors
+    FROM bookmark bm
+    LEFT JOIN book b ON bm.book_id = b.book_id
+    WHERE bm.user_id = @userId;
+END;
+
 

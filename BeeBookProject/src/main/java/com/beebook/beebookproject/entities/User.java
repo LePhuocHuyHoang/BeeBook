@@ -1,10 +1,13 @@
 package com.beebook.beebookproject.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Entity
@@ -48,6 +51,14 @@ public class User {
 
     @Transient
     private MultipartFile[] avatarFiles;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "bookmark",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "book_id")
+    )
+    @JsonIgnoreProperties("users")
+    List<Book> bookmark = new ArrayList<>();
 
 
 }
